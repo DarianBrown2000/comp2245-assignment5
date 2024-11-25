@@ -1,37 +1,50 @@
-// Wait for the DOM to fully load
 document.addEventListener('DOMContentLoaded', function() {
-    // Get references to the country input field, lookup button, and result div
+    // Get references to the input fields, lookup buttons, and result div
     const countryInput = document.getElementById('country');
     const lookupButton = document.getElementById('lookup');
+    const lookupCitiesButton = document.getElementById('lookupCities'); // New button for cities
     const resultDiv = document.getElementById('result');
 
-    // Add a click event listener to the "Lookup" button
+    // Add click event listener for country lookup
     lookupButton.addEventListener('click', function() {
-        // Get the value entered in the country input field
         const country = countryInput.value.trim();
-
-        // If the input is empty, do nothing
         if (country === '') {
             resultDiv.innerHTML = '<p>Please enter a country name.</p>';
             return;
         }
 
-        // Create a new XMLHttpRequest (AJAX request)
+        fetchData(country, 'country');
+    });
+
+    // Add click event listener for city lookup
+    lookupCitiesButton.addEventListener('click', function() {
+        const country = countryInput.value.trim();
+        if (country === '') {
+            resultDiv.innerHTML = '<p>Please enter a country name.</p>';
+            return;
+        }
+
+        fetchData(country, 'cities');
+    });
+
+    // Function to handle the AJAX request based on lookup type (country or cities)
+    function fetchData(country, lookupType) {
         const xhr = new XMLHttpRequest();
+        let url = `world.php?country=${encodeURIComponent(country)}`;
 
-        // Set up the request
-        xhr.open('GET', `world.php?country=${encodeURIComponent(country)}`, true);
+        // Modify the URL to include the lookup type (for cities lookup)
+        if (lookupType === 'cities') {
+            url += '&lookup=cities';
+        }
 
-        // Set the response type to JSON (if world.php returns JSON data)
+        xhr.open('GET', url, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        // Handle the response once the request is complete
+        // Handle the response
         xhr.onload = function() {
             if (xhr.status >= 200 && xhr.status < 300) {
-                // Parse the response (assuming world.php returns HTML or JSON)
-                resultDiv.innerHTML = xhr.responseText;
+                resultDiv.innerHTML = xhr.responseText; // Populate with the response
             } else {
-                // Handle errors 
                 resultDiv.innerHTML = '<p>Error retrieving data. Please try again later.</p>';
             }
         };
@@ -43,5 +56,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Send the request
         xhr.send();
-    });
+    }
 });
